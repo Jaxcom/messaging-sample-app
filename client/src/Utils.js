@@ -6,32 +6,28 @@ export default class Utils {
     )}-${number.substring(8, 12)}`;
   }
 
-  static threadIdToFriendlyList(threadId, myNumber) {
+  static threadIdToFromNumber(threadId) {
+    // the first number in the thread id is the from number
     if (!threadId || threadId === "") {
       return "";
     }
-    let recipients = [];
-    threadId.split(",").map(number => {
-      if (number !== myNumber) {
-        number = number.trim();
-        if (number.startsWith("+1") && number.length === 12) {
-          recipients.push(this.formatE164ToUsLocal(number));
-        } else {
-          recipients.push(number);
-        }
-      }
-      return "";
-    });
-    return recipients.join(", ");
+    return threadId.split(",")[0]
   }
 
-  static sanitizeThreadId(threadId) {
-    return threadId
-      //.replace(/(\+1)?([^0-9,])?/g, "")
-      .split(",")
-      //.map(number => `+1${number}`)
-      //.concat(process.env.REACT_APP_APPLICATION_NUMBER)
-      .sort()
-      .join(",");
+  static threadIdToFriendlyList(threadId) {
+    if (!threadId || threadId === "") {
+      return "";
+    }
+    let recipients = threadId.split(",");
+    recipients.shift() // remove first number, it is the from number
+    return recipients.join(",")
+  }
+
+  static sanitizeThreadId(fromNumber, toNumbers) {
+    if (fromNumber !== "" && toNumbers !== "") {
+      // a full thread id requires a from number and at least one to number
+      return fromNumber.trim() + "," + toNumbers.trim();
+    }
+    return "";
   }
 }

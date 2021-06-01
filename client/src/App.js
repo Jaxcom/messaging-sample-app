@@ -42,6 +42,8 @@ export default class App extends Component {
       threads: [],
       messages: [],
       currentThreadId: "",
+      currentFromNumber: "",
+      currentToNumbers: "",
       messageText: "",
       composingNewThread: false
     };
@@ -99,10 +101,7 @@ export default class App extends Component {
               {this.state.threads.map(thread => {
                 return (
                   <SidebarItem
-                    title={utils.threadIdToFriendlyList(
-                      thread.id,
-                      process.env.REACT_APP_APPLICATION_NUMBER
-                    )}
+                    title={thread.id}
                     subtitle={thread.text}
                     onClick={() => {
                       this.onThreadClickHandler(thread.id);
@@ -117,21 +116,32 @@ export default class App extends Component {
               })}
             </Sidebar>
             <Box fill>
-              <Box pad="small" elevation="small">
+
+              <Box pad="small" elevation="small" direction="row">
+                {/* from number text box */}
                 <TextInput
-                  value={utils.threadIdToFriendlyList(
-                    this.state.currentThreadId,
-                    process.env.REACT_APP_APPLICATION_NUMBER
-                  )}
-                  onChange={this.handleThreadIdTextChange}
-                  onKeyDown={this.handleKeyPressOnThreadId}
-                  onBlur={this.handleThreadIdBlur}
+                  placeholder="From number"
+                  value={this.state.composingNewThread ? this.state.currentFromNumber : utils.threadIdToFromNumber(this.state.currentThreadId)}
+                  onChange={this.handleFromNumberTextChange}
+                  onKeyDown={this.handleKeyPressOnNumberInput}
                   ref={input => {
-                    this.threadIdInput = input;
+                    this.fromNumberInput = input;
+                  }}
+                />
+
+                {/* to number text box */}
+                <TextInput
+                  placeholder="To number(s)"
+                  value={this.state.composingNewThread ? this.state.currentToNumbers : utils.threadIdToFriendlyList(this.state.currentThreadId)}
+                  onChange={this.handleToNumbersTextChange}
+                  onKeyDown={this.handleKeyPressOnNumberInput}
+                  ref={input => {
+                    this.toNumbersInput = input;
                   }}
                 />
               </Box>
 
+              {/* conversation box */}
               <Box
                 fill
                 justify="end"
@@ -157,6 +167,8 @@ export default class App extends Component {
                   })}
                 </Box>
               </Box>
+
+              {/* message text box and send button */}
               <Box
                 direction="row"
                 border={{ side: "top", color: "border", width: "xsmall" }}
@@ -169,6 +181,7 @@ export default class App extends Component {
                     this.setState({ messageText: event.target.value });
                   }}
                   onKeyDown={this.handleKeyPress}
+                  onFocus={this.handleFocusOnTextInput}
                   ref={input => {
                     this.textInput = input;
                   }}
@@ -197,39 +210,34 @@ export default class App extends Component {
     this.setState({
       composingNewThread: true,
       messages: [],
-      currentThreadId: ""
+      currentThreadId: "",
+      currentFromNumber: "",
+      currentToNumbers: ""
     });
-    this.threadIdInput.focus();
+    this.fromNumberInput.focus();
   };
 
-  handleThreadIdTextChange = e => {
+  handleToNumbersTextChange = e => {
     if (this.state.composingNewThread) {
-      this.setState({ currentThreadId: e.target.value });
+      console.log(e.target.value);
+      this.setState({ currentToNumbers: e.target.value });
     }
   };
 
-  handleThreadIdBlur = e => {
-    let newThreadId = utils.sanitizeThreadId(this.state.currentThreadId);
-    this.setState({
-      currentThreadId: newThreadId
-    });
-    this.state.threads.forEach(async thread => {
-      if (newThreadId === thread.id) {
-        // We already have a thread with this ID so just load that one
-        this.setState({ composingNewThread: false });
-        await this.controller.getMessagesForThread(thread.id);
-        await this.controller.refreshThreads();
-      }
-    });
+  handleFromNumberTextChange = e => {
+    if (this.state.composingNewThread) {
+      console.log(e.target.value);
+      this.setState({ currentFromNumber: e.target.value });
+    }
   };
 
-  handleKeyPressOnThreadId = async e => {
+  handleKeyPressOnNumberInput = async e => {
     if (this.state.composingNewThread) {
       let keyCode = e.keyCode || e.which;
-      let newThreadId = utils.sanitizeThreadId(this.state.currentThreadId);
-      if (keyCode === 13) {
+      let newThreadId = utils.sanitizeThreadId(this.state.currentFromNumber, this.state.currentToNumbers);
+      if (keyCode === 13 && newThreadId !== "") {
         this.setState({
-          currentThreadId: newThreadId
+          currentThreadId: newThreadId,
         });
         this.state.threads.forEach(async thread => {
           if (newThreadId === thread.id) {
@@ -248,6 +256,25 @@ export default class App extends Component {
     let keyCode = e.keyCode || e.which;
     if (keyCode === 13) {
       this.sendMessage();
+    }
+  };
+
+  handleFocusOnTextInput = async e => {
+    if (this.state.composingNewThread) {
+      let newThreadId = utils.sanitizeThreadId(this.state.currentFromNumber, this.state.currentToNumbers);
+      if (newThreadId !== "") {
+        this.setState({
+          currentThreadId: newThreadId,
+        });
+        this.state.threads.forEach(async thread => {
+          if (newThreadId === thread.id) {
+            // We already have a thread with this ID so just load that one
+            this.setState({ composingNewThread: false });
+            await this.controller.getMessagesForThread(thread.id);
+            await this.controller.refreshThreads();
+          }
+        });
+      }
     }
   };
 

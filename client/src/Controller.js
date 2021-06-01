@@ -34,7 +34,9 @@ export default class Controller {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        text: text
+        text: text,
+        from: this.context.state.currentFromNumber,
+        to: this.context.state.currentToNumbers
       })
     });
 
