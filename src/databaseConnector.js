@@ -145,9 +145,8 @@ module.exports = class DatabaseConnector {
   }
 
   getThreadIdForMessage(message) {
-    let participants = message.to.slice();
-    participants.push(message.from);
-    return participants.sort().join();
+    let participants = [message.from]
+    return participants.concat(message.to.slice()).join();
   }
 
   removeApplicationId(message) {
