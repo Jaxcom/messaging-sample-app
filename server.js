@@ -10,6 +10,7 @@ const DatabaseConnector = require("./src/databaseConnector");
 
 const db = new DatabaseConnector();
 const port = process.env.PORT || 3000;
+const FROM_NUMBERS = process.env.FROM_NUMBERS.split(",");
 
 let client = new Bandwidth({
   baseUrl: "https://messaging.bandwidth.com/api",
@@ -62,15 +63,16 @@ app.get("/api/threads/:threadId/:messageId", async (req, res) => {
 app.post("/api/threads/:threadId", async (req, res) => {
   try {
     let participants = req.params.threadId.split(",");
+    let from = req.params.from
     let recipients = [];
     participants.forEach(participant => {
-      if (participant !== "" && participant !== process.env.APPLICATION_NUMBER) {
+      if (participant !== "" && participant !== from) {
         recipients.push(participant);
       }
     });
     console.log(`sending to ${recipients}`);
     let message = await client.v2.Message.send({
-      from: process.env.APPLICATION_NUMBER,
+      from: from,
       to: recipients,
       text: req.body.text,
       applicationId: process.env.APPLICATION_ID
