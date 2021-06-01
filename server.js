@@ -63,7 +63,7 @@ app.get("/api/threads/:threadId/:messageId", async (req, res) => {
 app.post("/api/threads/:threadId", async (req, res) => {
   try {
     let participants = req.params.threadId.split(",");
-    let from = req.params.from
+    let from = req.body.from
     let recipients = [];
     participants.forEach(participant => {
       if (participant !== "" && participant !== from) {
@@ -71,7 +71,7 @@ app.post("/api/threads/:threadId", async (req, res) => {
       }
     });
 
-    if !(FROM_NUMBERS.includes(from)) {
+    if (!FROM_NUMBERS.includes(from)) {
       throw `Unrecognized From number ${from}`;
     }
 
