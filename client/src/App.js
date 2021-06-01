@@ -85,7 +85,7 @@ export default class App extends Component {
                 />
               </svg>
               <Heading level="3" margin={{ horizontal: "small" }}>
-                Messaging Sample App
+                My Little Phoney
               </Heading>
             </Box>
           </AppBar>
