@@ -4,6 +4,8 @@
 2. Change some environment variable names to be more relevant.
 3. Remove the `applicationId` from the message payload before writing it to the database.
 4. Remove annoying automatic prefixing of "+1" with phone numbers.
+5. Update client to have a separate text input for the `From` number.
+6. Update server to work with multiple `From` numbers.
 
 # Bandwidth Messaging API Sample App
 
@@ -39,37 +41,28 @@ BANDWIDTH_API_TOKEN=
 BANDWIDTH_API_SECRET=
 
 APPLICATION_ID=
-APPLICATION_NUMBER=<'from' phone number>
+APPLICATION_FROM_NUMBERS=<'from' phone numbers>
 ```
 
-### Set the application number in the front end
+### Start MariaDB database
 
-You will also need to set your Application Number in the front end for the UI to display correctly. Edit `/client/.env` and set your number:
+Start the `docker-compose` stack in [`pony-formation/docker/my-little-phoney/docker-compose.local.yml`](https://github.com/pushpay/pony-formation/blob/master/docker/my-little-phoney/docker-compose.mariadb.yml). This will start a MariaDB service on port 3306.
 
-```
-REACT_APP_APPLICATION_NUMBER=<'from' phone number>
-```
-
-### Create the database schema
-
-You can use [Flyway](https://flywaydb.org/) to run the SQL migration script to create your schema. For example if you are running the DB on `localhost` you should be able to use the following command:
-Flyway
-
-    $ flyway -user=root -password="" -locations=filesystem:sql -url=jdbc:mariadb://localhost:3306/messaging migrate
-
-Alternatively, you could just copy/paste the contents of the `sql/V1__create_schema.sql` file into your favorite SQL tool to create the schema.
-
-## Install Node.js dependencies
-
-(Note: I think it requires Node 12 and only works on Linux? I tried building it on macOS Catalina with different Node versions but no luck ¯\_(ツ)_/¯.)
+### Install Node.js dependencies
 
     $ npm run install:all
 
-## Build and run
+### Build the client app
 
+    $ cd client
+    $ npm build
+
+### Build and run the server
+
+    $ cd ..
     $ npm start
     Server listening on port 5000
 
-## Start messaging!
+### Start messaging!
 
 Open a web browser and point it to `http://localhost:5000`
