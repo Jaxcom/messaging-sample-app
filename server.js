@@ -70,7 +70,12 @@ app.post("/api/threads/:threadId", async (req, res) => {
         recipients.push(participant);
       }
     });
-    console.log(`sending to ${recipients}`);
+
+    if !(FROM_NUMBERS.includes(from)) {
+      throw `Unrecognized From number ${from}`;
+    }
+
+    console.log(`sending from ${from} to ${recipients}`);
     let message = await client.v2.Message.send({
       from: from,
       to: recipients,
