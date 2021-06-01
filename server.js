@@ -10,7 +10,7 @@ const DatabaseConnector = require("./src/databaseConnector");
 
 const db = new DatabaseConnector();
 const port = process.env.PORT || 3000;
-const FROM_NUMBERS = process.env.FROM_NUMBERS.split(",");
+const APPLICATION_FROM_NUMBERS = process.env.APPLICATION_FROM_NUMBERS.split(",");
 
 let client = new Bandwidth({
   baseUrl: "https://messaging.bandwidth.com/api",
@@ -66,7 +66,7 @@ app.post("/api/threads/:threadId", async (req, res) => {
     let from = req.body.from
     let recipients = req.body.to.split(",");
 
-    if (!FROM_NUMBERS.includes(from)) {
+    if (!APPLICATION_FROM_NUMBERS.includes(from)) {
       throw `Unrecognized From number ${from}`;
     }
 
